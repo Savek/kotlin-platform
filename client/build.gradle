@@ -1,0 +1,57 @@
+version '1.0'
+
+apply plugin: 'kotlin2js'
+apply plugin: 'kotlin-dce-js'
+apply plugin: 'org.jetbrains.kotlin.frontend'
+
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
+    implementation project(':common')
+
+    testImplementation "org.jetbrains.kotlin:kotlin-test-js"
+}
+
+kotlinFrontend {
+    downloadNodeJsVersion = "latest"
+
+    npm {
+    }
+
+    define "PRODUCTION", false
+    define "X", false
+
+}
+
+compileKotlin2Js {
+    kotlinOptions.metaInfo = true
+    kotlinOptions.outputFile = "$project.buildDir.path/js/${project.name}.js"
+    kotlinOptions.verbose = true
+    kotlinOptions.sourceMap = true
+    kotlinOptions.moduleKind = 'umd'
+    kotlinOptions.main = "call"
+}
+
+def outputDir = "${project.buildDir.path}/web"
+
+kotlinFrontend {
+    downloadNodeJsVersion = "latest"
+
+
+    npm {
+    }
+
+    webpackBundle {
+        bundleName = "main"
+        sourceMapEnabled = true  // enable/disable source maps
+        contentPath = file('src/main/web') // a file that represents a directory to be served by dev server)
+        publicPath = "/"  // web prefix
+        port = 8088   // dev server port
+        proxyUrl = "" // URL to be proxied, useful to proxy backend webserver
+        stats = "errors-only"  // log level
+    }
+}
+
+clean.doFirst() {
+    delete "$outputDir"
+}

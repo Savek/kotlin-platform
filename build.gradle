@@ -1,27 +1,51 @@
 allprojects {
 
-  def isRoot = it == it.rootProject
+    def isRoot = it == it.rootProject
 
-  ext.kotlin_version = "1.3.50"
+    ext.kotlin_version = "1.3.50"
 
-  buildscript {
+    buildscript {
 
-    if (isRoot) return
+        if (isRoot) return
+
+        repositories {
+            jcenter()
+            maven {
+                url "https://dl.bintray.com/kotlin/kotlin-eap"
+            }
+            mavenCentral()
+            mavenLocal()
+        }
+
+        dependencies {
+            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+            classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.45"
+        }
+
+        tasks.withType(Test) {
+            testLogging {
+                showStandardStreams = true
+                events "passed", "failed"
+            }
+        }
+    }
 
     repositories {
-      mavenCentral()
-      mavenLocal()
+        mavenCentral()
+        mavenLocal()
     }
 
-    dependencies {
-      classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    // TODO remove once https://github.com/Kotlin/kotlin-frontend-plugin/issues/141 is fixed
+    plugins.whenPluginAdded { plugin ->
+        if (plugin.class.name == 'org.jetbrains.kotlin.gradle.frontend.FrontendPlugin') {
+            def fixTask = tasks.register('webpack-config-fix') {
+                it.doLast { file('webpack.config.d').mkdir() }
+            }
+            afterEvaluate {
+                tasks.named('webpack-config').configure {
+                    it.dependsOn(fixTask)
+                }
+            }
+        }
     }
-
-    tasks.withType(Test) {
-      testLogging {
-        showStandardStreams = true
-        events "passed", "failed"
-      }
-    }
-  }
 }

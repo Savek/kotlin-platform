@@ -1,2 +1,3 @@
-include 'kotlin-jvm'
-
+include 'common'
+include 'server'
+include 'client'

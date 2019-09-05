@@ -46,7 +46,7 @@ kotlin {
                 kotlinOptions.suppressWarnings = true
                 kotlinOptions.verbose = true
                 kotlinOptions.main = "call"
-                kotlinOptions.moduleKind = "umd"
+                kotlinOptions.moduleKind = "commonjs"
             }
         }
         jsTest {
